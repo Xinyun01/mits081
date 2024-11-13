@@ -3,8 +3,9 @@
 #include "user/user.h"
 #include "kernel/fs.h"
 
-char*
-fmtname(char *path)
+
+//格式命名
+char* fmtname(char *path)
 {
   static char buf[DIRSIZ+1];
   char *p;
@@ -18,13 +19,23 @@ fmtname(char *path)
   if(strlen(p) >= DIRSIZ)
     return p;
   memmove(buf, p, strlen(p));
-  memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
+  memset(buf+strlen(p), 0, DIRSIZ-strlen(p));
   return buf;
 }
 
-void
-ls(char *path)
+//使用递归
+int recursion(char *path){
+  char* buf = fmtname(path);
+  if( strcmp(fmtname(buf),"..") == 0 ||strcmp(fmtname(buf),".") == 0){
+    return 0;
+  }
+  return 1;
+}
+
+//传入文件路径和查找文件名
+void find(char *path,char *filename)
 {
+  //printf("path = %s  filename = %s  fmtname(path) = %s\n",path,filename,fmtname(path));
   char buf[512], *p;
   int fd;
   struct dirent de;
@@ -40,17 +51,19 @@ ls(char *path)
     close(fd);
     return;
   }
+
+  if( strcmp(fmtname(path),filename) == 0){
+     // printf("path = %s filename = %s \n",path,filename);
+  }
 //#define T_DIR     1   // Directory
 //#define T_FILE    2   // File
 //#define T_DEVICE  3   // Device
   switch(st.type){
-  case T_FILE:
-    printf(" %s %d %d %l %s\n", fmtname(path), st.type, st.ino, st.size,path);
+  case T_FILE:    
     break;
-
   case T_DIR:
     if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){
-      printf("ls: path too long\n");
+      //printf("ls: path too long\n");
       break;
     }
     strcpy(buf, path);
@@ -65,24 +78,36 @@ ls(char *path)
         printf("ls: cannot stat %s\n", buf);
         continue;
       }
-      printf("   %s %d %d %d %s\n", fmtname(buf), st.type, st.ino, st.size,buf);
+
+    
+       if( strcmp(fmtname(buf),filename) == 0){
+      // printf("path = %s buf = %s (fmtname(buf)= %s\n",path, buf,fmtname(buf));
+         printf("%s\n",buf);
+       }
+     //使用递归  在该文件目录之下是否还有其他的文件进行递归 buf 为文件路径  不递归"." ".."
+     if(recursion(buf)) find(buf,filename);
+
     }
     break;
   }
   close(fd);
 }
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-  int i;
-
-  if(argc < 2){
-    printf("path, st.type, st.ino, st.size\n");
-    ls(".");
+  
+  if(argc == 1){
+    printf("error");
+    exit(1);
+  }
+  else if(argc == 2){
+    
+    find(".",argv[1]); //eg find sh
     exit(0);
   }
-  for(i=1; i<argc; i++)
-    ls(argv[i]);
-  exit(0);
+  else if(argc == 3){
+    find( argv[1] , argv[2] );//eg find . sh
+  }
+   exit(0);
+
 }

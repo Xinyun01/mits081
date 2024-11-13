@@ -195,8 +195,9 @@ UPROGS=\
 	$U/_zombie\
 	$U/_pingpong\
 	$U/_sleep\
-
-
+	$U/_find\
+	$U/_primes\
+	
 ifeq ($(LAB),$(filter $(LAB), pgtbl lock))
 UPROGS += \
 	$U/_stats

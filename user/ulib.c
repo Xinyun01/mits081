@@ -26,7 +26,7 @@ uint
 strlen(const char *s)
 {
   int n;
-
+  //每次循环开始时检查 s[n]，即 s 指向的字符串在位置 n 处的字符是否为非空（不是 \0）
   for(n = 0; s[n]; n++)
     ;
   return n;

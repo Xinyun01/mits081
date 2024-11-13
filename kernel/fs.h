@@ -54,7 +54,7 @@ struct dinode {
 #define DIRSIZ 14
 
 struct dirent {
-  ushort inum;
-  char name[DIRSIZ];
+  ushort inum;      //// 目录项对应的 inode 号
+  char name[DIRSIZ];//文件名，最大支持 `DIRSIZ` 长度
 };
 
