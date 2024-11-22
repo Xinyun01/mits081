@@ -21,6 +21,7 @@ fetchaddr(uint64 addr, uint64 *ip)
 
 // Fetch the nul-terminated string at addr from the current process.
 // Returns length of string, not including nul, or -1 for error.
+//文件系统调用(如exec)使用fetchstr从用户空间检索字符串文件名参数
 int
 fetchstr(uint64 addr, char *buf, int max)
 {
@@ -105,6 +106,9 @@ extern uint64 sys_wait(void);
 extern uint64 sys_write(void);
 extern uint64 sys_uptime(void);
 
+extern uint64 sys_trace(void);
+extern uint64 sys_sysinfo(void);
+
 static uint64 (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
 [SYS_exit]    sys_exit,
@@ -127,10 +131,14 @@ static uint64 (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
-};
 
-void
-syscall(void)
+[SYS_trace]   sys_trace,
+[SYS_sysinfo]   sys_sysinfo
+};
+// static char *sys_name[] = {  "fork","exit","wait","pipe","read","kill","exec","fstat","chdir","dup","getpid","sbrk","sleep","uptime","open","write","mknod""unlink","link",
+//                               "mkdir","close","trace "  };
+
+void syscall(void)
 {
   int num;
   struct proc *p = myproc();
@@ -138,6 +146,11 @@ syscall(void)
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     p->trapframe->a0 = syscalls[num]();
+    // int trace_mask = p->mask;
+    // if((trace_mask >> num) & 1){     
+    //   printf("%d: syscall %s -> %d\n",p->pid,sys_name[num-1],p->trapframe->a0);  
+    // }
+
   } else {
     printf("%d %s: unknown sys call %d\n",
             p->pid, p->name, num);

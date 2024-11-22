@@ -62,6 +62,7 @@ OBJS += \
 	$K/net.o \
 	$K/sysnet.o \
 	$K/pci.o
+
 endif
 
 
@@ -193,8 +194,8 @@ UPROGS=\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
-
-
+	$U/_trace\
+	$U/_sysinfotest
 
 
 ifeq ($(LAB),$(filter $(LAB), pgtbl lock))

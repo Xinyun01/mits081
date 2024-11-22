@@ -164,6 +164,7 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+  p->mask = 0; //?????
 }
 
 // Create a user page table for a given process,
@@ -289,6 +290,7 @@ fork(void)
   }
   np->sz = p->sz;
 
+ // np->mask = p->mask;// 子进程复制父进程
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
 
@@ -653,4 +655,19 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+//收集进程数，在kernel/proc.c
+uint64 get_nproc(void)
+{
+  struct proc *p;
+  int cnt = 0;
+ for(p = proc; p < &proc[NPROC]; p++) {
+    acquire(&p->lock);
+    if(p->state != UNUSED) {
+      cnt++;
+    } 
+    release(&p->lock);
+  }
+  return cnt;
 }
